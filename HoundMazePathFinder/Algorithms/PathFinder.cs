@@ -1,5 +1,6 @@
 ﻿namespace HoundMazePathFinder.Algorithms
 {
+    using System;
     using System.Collections.Generic;
     using System.Drawing;
     using System.Linq;
@@ -62,12 +63,13 @@
             }
         }
 
+      
         /// <summary>
         /// Searchs over the maze.
         /// </summary>
         /// <param name="currentNode"></param>
         /// <returns></returns>
-        private bool Search(Node currentNode)
+        public bool Search(Node currentNode)
         {
             currentNode.State = NodeState.Closed;
             List<Node> nextNodes = GetAlongsideWalkNodes(currentNode);
@@ -149,6 +151,5 @@
 
             return walkaNodes;
         }
-        
     }
 }

@@ -6,6 +6,6 @@
     public interface IPathFinder
     {
         List<Point> FindPath();
-        bool Search(Node currentNode)
+        bool Search(Node currentNode);
     }
 }
