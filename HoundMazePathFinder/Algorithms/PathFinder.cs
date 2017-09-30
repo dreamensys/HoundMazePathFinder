@@ -4,7 +4,7 @@
     using System.Drawing;
     using System.Linq;
 
-    public class PathFinder
+    public class PathFinder : IPathFinder
     {
         private int width;
         private int height;

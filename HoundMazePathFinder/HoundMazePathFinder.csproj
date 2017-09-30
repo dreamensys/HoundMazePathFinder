@@ -43,6 +43,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Algorithms\IPathFinder.cs" />
     <Compile Include="Algorithms\Node.cs" />
     <Compile Include="Algorithms\NodeState.cs" />
     <Compile Include="Algorithms\PathFinder.cs" />
