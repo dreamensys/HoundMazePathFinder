@@ -1,7 +1,4 @@
-﻿/// <summary>
-/// 
-/// </summary>
-
+﻿
 namespace HoundMazePathFinder
 {
     using HoundMazePathFinder.Algorithms;
@@ -9,15 +6,16 @@ namespace HoundMazePathFinder
     using System.Collections.Generic;
     using System.Diagnostics;
     using System.Drawing;
+    using System.IO;
     using System.Linq;
+    using System.Reflection;
     using System.Text;
-    using System.Threading.Tasks;
 
     class Program
     {
-        private bool[,]             map;
+        private List<bool[]>        map;
         private SearchParameters    findingParameters;
-        private const char          WALK_SPACES          = 'F';
+        private const string        WALK_SPACES          = "F";
 
         static void Main(string[] args)
         {
@@ -27,16 +25,11 @@ namespace HoundMazePathFinder
 
         public void Run()
         {
+            InitializeMapFromFile("Hound Maze(tsv).txt", new Point(54, 77), new Point(12, 20));
 
-            Ini();
-
-            return;
-
-
-
-
-
-            InitializeHoundMazeMap();
+            // Feel free to uncomment these two lines in order o test the algorithm with other mazes.
+            //InitializeMapFromFile("Sample1(tsv).txt", new Point(25, 0), new Point(13, 11));
+            //InitializeMapFromFile("Sample2(tsv).txt", new Point(25, 16), new Point(7, 5));
             PathFinder pathFinder = new PathFinder(findingParameters);
             Stopwatch timer = new Stopwatch();
             timer.Start();
@@ -48,7 +41,7 @@ namespace HoundMazePathFinder
             {
                 Console.Write(string.Format("[{0},{1}],", item.X, item.Y));
             }
-           // ShowPathRoute(path);    ///This method draws the entire path to meal, if you don't want to see it, please comment it.
+            ShowPathRoute(path);    ///This method draws the entire path to meal, if you don't want to see it, please comment it.
             Console.WriteLine("Press any key to exit...");
             Console.ReadKey();
         }
@@ -61,9 +54,9 @@ namespace HoundMazePathFinder
         private void ShowPathRoute(IEnumerable<Point> path)
         {
             Console.WriteLine(); 
-            for (int y = 0; y < this.map.GetLength(1) - 1; y++) 
+            for (int y = 0; y < this.map.Count; y++) 
             {
-                for (int x = 0; x < this.map.GetLength(0); x++)
+                for (int x = 0; x < this.map.First().Length; x++)
                 {
                     if (this.findingParameters.StartLocation.Equals(new Point(x, y)))
                         // Prints the position where the Hound starts the searching.
@@ -71,7 +64,7 @@ namespace HoundMazePathFinder
                     else if (this.findingParameters.EndLocation.Equals(new Point(x, y)))
                         // Prints the position where the meal is.   
                         Console.Write("F");
-                    else if (this.map[x, y] == false)
+                    else if (this.map[y][x] == false)
                         // Draws the walls.
                         Console.Write("░");
                     else if (path.Where(p => p.X == x && p.Y == y).Any())
@@ -88,53 +81,44 @@ namespace HoundMazePathFinder
             Console.WriteLine();
         }
 
-        private void Ini()
+        private void InitializeMapFromFile(string fileName, Point startCoordinates, Point finishCoordinates)
         {
-
-            int counter = 0;
+            int counter = 0, columnLimit = 0;
             string line;
-
-            // Read the file and display it line by line.  
-            System.IO.StreamReader file =
-                new System.IO.StreamReader(@"c:\Hound Maze(tsv).txt");
-            this.map = new bool[55, 55];
-            while ((line = file.ReadLine()) != null)
+            string path = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), @"Mazes\", fileName);
+            StreamReader file = new StreamReader(@path); 
+            this.map = new List<bool[]>();
+            int rowsCount = 0;
+            while ((line = file.ReadLine()) != null)    
             {
-                System.Console.WriteLine(line);
-                if(counter == 5)
+                if(counter >= 5)
                 {
-                    int rowsCount = 0;
-                    char[] characters = line.Substring(5).ToCharArray();
-                    for (int j = 0; j < characters.Length; j++)
+                    string[] characters = line.Substring(5).Split('\t');
+                    if (columnLimit == 0)
                     {
-                        this.map[j, rowsCount] = characters[j] == WALK_SPACES;
+                        columnLimit = characters.Length;
+                    }
+                    
+                    this.map.Add(new bool[characters.Length]);
+                    for (int j = 0; j < columnLimit; j++)
+                    {
+                        this.map[rowsCount][j] =  characters[j] == WALK_SPACES;                            
                     }
                     rowsCount++;
                 }
                 counter++;
             }
-
+            this.map.RemoveAll(r => r.Count() == 0);
             file.Close();
-            System.Console.WriteLine("There were {0} lines.", counter);
-            // Suspend the screen.  
-            System.Console.ReadLine();
 
-
-            for (int i = 0; i < lines.Length; i++)
-            {
-                char[] characters = lines[i].ToCharArray();
-                for (int j = 0; j < characters.Length; j++)
-                {
-                    this.map[j, i] = characters[j] == WALK_SPACES;
-                }
-            }
-
-            var startCoordinates = new Point(54, 77);
-            var finishCoordinates = new Point(12, 20);
             this.findingParameters = new SearchParameters(startCoordinates, finishCoordinates, map);
         }
 
-        private void InitializeHoundMazeMap()
+
+        /// <summary>
+        /// This is a dummy example to test the algorithm using a string instead a TSV file.
+        /// </summary>
+        private void InitializeHoundMazeMapFromString()
         {
 
             StringBuilder mazeBuilder = new StringBuilder();
@@ -218,16 +202,17 @@ namespace HoundMazePathFinder
             mazeBuilder.Append("XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXF,");
 
             string[] lines = mazeBuilder.ToString().Split(',');
-            this.map = new bool[55, lines.Length];
+            this.map = new List<bool[]>();
             for (int i = 0; i < lines.Length; i++)
             {
-                char[] characters = lines[i].ToCharArray();
+                string[] characters = lines[i].Split('\t');
+                this.map.Add(new bool[characters.Length]);
                 for (int j = 0; j < characters.Length; j++)
                 {
-                    this.map[j, i] = characters[j] == WALK_SPACES;
+                    this.map[i][j] = characters[j] == WALK_SPACES;
                 }
             }
-
+            this.map.RemoveAll(r => !r.Any());
             var startCoordinates = new Point(54, 77);
             var finishCoordinates = new Point(12, 20);
             this.findingParameters = new SearchParameters(startCoordinates, finishCoordinates, map);

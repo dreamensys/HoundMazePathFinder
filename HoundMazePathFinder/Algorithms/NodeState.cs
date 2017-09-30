@@ -1,20 +1,22 @@
 ﻿namespace HoundMazePathFinder.Algorithms
 {
     /// <summary>
-    /// Represents the search state of a Node
+    /// The Node State
     /// </summary>
     public enum NodeState
     {
         /// <summary>
-        /// The node has not yet been considered in any possible paths
-        /// </summary>
-        Untested,
-        /// <summary>
-        /// The node has been identified as a possible step in a path
+        /// The node is identified as a possible step.
         /// </summary>
         Open,
+
         /// <summary>
-        /// The node has already been included in a path and will not be considered again
+        /// The node has not been considered.
+        /// </summary>
+        Untested,
+
+        /// <summary>
+        /// The node is included in a path and will be discarded.
         /// </summary>
         Closed
     }

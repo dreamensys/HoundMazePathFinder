@@ -1,20 +1,88 @@
-﻿using System;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
-using HoundMazePathFinder.Algorithms;
-using System.Text;
-using System.Drawing;
-
-namespace HoundMazePathFinder.Tests
+﻿namespace HoundMazePathFinder.Tests
 {
+    using HoundMazePathFinder.Algorithms;
+    using Microsoft.VisualStudio.TestTools.UnitTesting;
+    using System.Collections.Generic;
+    using System.Drawing;
+    using System.Linq;
+    using System.Text;
+
     [TestClass]
     public class HoundMazePathFinderTests
     {
-        private bool[,] map;
+        private List<bool[]> map;
         private SearchParameters findingParameters;
 
-        [TestMethod]
-        public void TestMethod1()
+        [TestInitialize]
+        public void Initialize()
         {
+            this.map = new List<bool[]>();
+            for (int y = 0; y < 5; y++)
+            {
+                this.map.Add(new bool[7]);
+                for (int x = 0; x < 7; x++)
+                    map[y][x] = true;
+            }
+
+            var startLocation = new Point(1, 2);
+            var endLocation = new Point(5, 2);
+            this.findingParameters = new SearchParameters(startLocation, endLocation, map);
+        }
+
+        private void AddWallWithGap()
+        {
+
+            this.map[4][3] = false;
+            this.map[3][3] = false;
+            this.map[2][3] = false;
+            this.map[1][3] = false;
+            this.map[1][4] = false;
+        }
+
+
+        private void AddWallWithNoGap()
+        {
+            this.map[4][3] = false;
+            this.map[3][3] = false;
+            this.map[2][3] = false;
+            this.map[1][3] = false;
+            this.map[0][3] = false;
+        }
+
+        [TestMethod]
+        public void Test_WithoutWalls_CanFindPath()
+        {
+            PathFinder pathFinder = new PathFinder(findingParameters);
+
+            List<Point> path = pathFinder.FindPath();
+
+            Assert.IsNotNull(path);
+            Assert.IsTrue(path.Any());
+            Assert.AreEqual(4, path.Count);
+        }
+
+        [TestMethod]
+        public void Test_OpenWall_FindPathAroundWall()
+        {
+            AddWallWithGap();
+            PathFinder pathFinder = new PathFinder(findingParameters);
+
+            List<Point> path = pathFinder.FindPath();
+
+            Assert.IsNotNull(path);
+            Assert.IsTrue(path.Any());
+        }
+
+        [TestMethod]
+        public void Test_ClosedWall_DontFindPath()
+        {
+            AddWallWithNoGap();
+            PathFinder pathFinder = new PathFinder(findingParameters);
+
+            List<Point> path = pathFinder.FindPath();
+
+            Assert.IsNotNull(path);
+            Assert.IsFalse(path.Any());
         }
         private void InitializeHoundMazeMap()
         {
@@ -100,7 +168,7 @@ namespace HoundMazePathFinder.Tests
             mazeBuilder.Append("XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXF,");
 
             string[] strArray = mazeBuilder.ToString().Split(',');
-            this.map = new bool[55, strArray.Length];
+            /*this.map = new bool[55, strArray.Length];
             for (int i = 0; i < strArray.Length; i++)
             {
                 char[] strBoolean = strArray[i].ToCharArray();
@@ -112,7 +180,7 @@ namespace HoundMazePathFinder.Tests
 
             var startCoordinates = new Point(54, 77);
             var finishCoordinates = new Point(12, 20);
-            this.findingParameters = new SearchParameters(startCoordinates, finishCoordinates, map);
+            this.findingParameters = new SearchParameters(startCoordinates, finishCoordinates, map);*/
         }
     }
 }
